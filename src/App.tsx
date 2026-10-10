@@ -1,6 +1,6 @@
 import { Dialog, DialogBackdrop, DialogPanel } from "@headlessui/react"
 import { XIcon } from "lucide-react"
-import { useEffect, useState } from "react"
+import { useActionState, useEffect, useState } from "react"
 import "./App.css"
 import StatsHeader from "./components/stats-header"
 import TransactionsTable from "./components/transactions-table"
@@ -20,6 +20,78 @@ function App() {
   const [balance, setBalance] = useState(0)
   const [transactions, setTransactions] = useState<TransactionType[]>([])
   const [newTransactionModalOpen, setNewTransactionModalOpen] = useState(false)
+  const [formState, formAction, isSubmitting] = useActionState(
+    async (_previousState: { error: string | null }, formData: FormData) => {
+      const amount = Number(formData.get("amount"))
+      const description = String(formData.get("description") ?? "").trim()
+      const category = String(formData.get("category") ?? "").trim()
+      const type = formData.get("transaction-type")
+
+      if (!Number.isFinite(amount) || amount <= 0) {
+        return { error: "Enter an amount greater than zero." }
+      }
+      if (!description || !category) {
+        return { error: "Enter a description and category." }
+      }
+      if (type !== "income" && type !== "expense") {
+        return { error: "Select a transaction type." }
+      }
+
+      try {
+        const response = await fetch("/api/transactions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ amount, description, category, type }),
+        })
+        if (!response.ok) {
+          throw new Error(`Failed to save transaction: ${response.status}`)
+        }
+
+        try {
+          const [transactionsResponse, summaryResponse] = await Promise.all([
+            fetch("/api/transactions"),
+            fetch("/api/summary"),
+          ])
+          if (!transactionsResponse.ok || !summaryResponse.ok) {
+            throw new Error("Failed to refresh the budget data")
+          }
+
+          const [transactionResult, summary] = await Promise.all([
+            transactionsResponse.json() as Promise<
+              Array<Omit<TransactionType, "date"> & { date: string }>
+            >,
+            summaryResponse.json() as Promise<{
+              income: number
+              expense: number
+              balance: number
+            }>,
+          ])
+          setTransactions(
+            transactionResult.map((transaction) => ({
+              ...transaction,
+              date: new Date(transaction.date),
+            }))
+          )
+          setIncome(summary.income)
+          setExpense(summary.expense)
+          setBalance(summary.balance)
+        } catch (error) {
+          console.error("Unable to refresh budget data", error)
+        }
+
+        setNewTransactionModalOpen(false)
+        return { error: null }
+      } catch (error) {
+        return {
+          error:
+            error instanceof Error
+              ? error.message
+              : "Unable to save the transaction.",
+        }
+      }
+    },
+    { error: null }
+  )
 
   useEffect(() => {
     const controller = new AbortController()
@@ -139,7 +211,7 @@ function App() {
               </div>
               <div className="flex flex-col items-center gap-8">
                 <div className="w-full">
-                  <form className="">
+                  <form action={formAction}>
                     <div className="px-4 py-6 sm:p-8">
                       <div className="grid max-w-2xl grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
                         <div className="sm:col-span-4">
@@ -155,7 +227,10 @@ function App() {
                                 id="amount"
                                 name="amount"
                                 type="number"
-                                placeholder={0.0}
+                                min="0.01"
+                                step="0.01"
+                                required
+                                placeholder="0.00"
                                 className="block min-w-0 grow bg-white py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6 dark:bg-transparent dark:text-white dark:placeholder:text-gray-500"
                               />
                             </div>
@@ -174,6 +249,7 @@ function App() {
                               id="description"
                               name="description"
                               rows={3}
+                              required
                               className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 dark:bg-white/5 dark:text-white dark:outline-1 dark:-outline-offset-1 dark:outline-gray-600 dark:placeholder:text-gray-500 dark:focus:outline-indigo-500"
                               defaultValue={""}
                             />
@@ -196,6 +272,7 @@ function App() {
                                 defaultChecked={true}
                                 id="income"
                                 name="transaction-type"
+                                value="income"
                                 type="radio"
                                 className="relative size-4 appearance-none rounded-full border border-gray-300 bg-white before:absolute before:inset-1 before:rounded-full before:bg-white not-checked:before:hidden checked:border-indigo-600 checked:bg-indigo-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:border-gray-300 disabled:bg-gray-100 disabled:before:bg-gray-400 dark:border-white/10 dark:bg-white/5 dark:checked:border-indigo-500 dark:checked:bg-indigo-500 dark:focus-visible:outline-indigo-500 dark:disabled:border-white/5 dark:disabled:bg-white/10 dark:disabled:before:bg-white/20 forced-colors:appearance-auto forced-colors:before:hidden"
                               />
@@ -211,6 +288,7 @@ function App() {
                                 defaultChecked={false}
                                 id="expense"
                                 name="transaction-type"
+                                value="expense"
                                 type="radio"
                                 className="relative size-4 appearance-none rounded-full border border-gray-300 bg-white before:absolute before:inset-1 before:rounded-full before:bg-white not-checked:before:hidden checked:border-indigo-600 checked:bg-indigo-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:border-gray-300 disabled:bg-gray-100 disabled:before:bg-gray-400 dark:border-white/10 dark:bg-white/5 dark:checked:border-indigo-500 dark:checked:bg-indigo-500 dark:focus-visible:outline-indigo-500 dark:disabled:border-white/5 dark:disabled:bg-white/10 dark:disabled:before:bg-white/20 forced-colors:appearance-auto forced-colors:before:hidden"
                               />
@@ -237,6 +315,7 @@ function App() {
                                 id="category"
                                 name="category"
                                 type="text"
+                                required
                                 placeholder=""
                                 className="block min-w-0 grow bg-white py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6 dark:bg-transparent dark:text-white dark:placeholder:text-gray-500"
                               />
@@ -245,6 +324,15 @@ function App() {
                         </div>
                       </div>
                     </div>
+
+                    {formState.error && (
+                      <p
+                        role="alert"
+                        className="px-4 pb-2 text-sm text-red-600 sm:px-8 dark:text-red-400"
+                      >
+                        {formState.error}
+                      </p>
+                    )}
 
                     <div className="flex items-center justify-end gap-x-6 border-t border-gray-900/10 px-4 py-4 sm:px-8 dark:border-white/10">
                       <button
@@ -256,9 +344,20 @@ function App() {
                       </button>
                       <button
                         type="submit"
+                        disabled={isSubmitting}
                         className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 dark:bg-indigo-500 dark:shadow-none dark:hover:bg-indigo-400 dark:focus-visible:outline-indigo-500"
+                        // onClick={() =>
+                        //   addTransaction({
+                        //     id: crypto.randomUUID(),
+                        //     date: new Date(),
+                        //     description,
+                        //     amount,
+                        //     category,
+                        //     type,
+                        //   })
+                        // }
                       >
-                        Save
+                        {isSubmitting ? "Saving…" : "Save"}
                       </button>
                     </div>
                   </form>

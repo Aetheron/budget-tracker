@@ -1,7 +1,7 @@
 "use client"
 
-import clsx from "clsx"
 import type { TransactionType } from "../App"
+import Transaction from "./transaction"
 
 export default function TransactionsTable({
   transactions,
@@ -31,7 +31,7 @@ export default function TransactionsTable({
                   scope="col"
                   className="sticky top-0 z-10 hidden border-b border-gray-300 bg-white/75 px-3 py-3.5 text-left text-sm font-semibold text-gray-900 backdrop-blur-sm backdrop-filter lg:table-cell dark:border-white/15 dark:bg-gray-900/75 dark:text-white"
                 >
-                  Descriptioon
+                  Description
                 </th>
                 <th
                   scope="col"
@@ -49,64 +49,15 @@ export default function TransactionsTable({
             </thead>
             <tbody>
               {transactions.map((transaction, transactionIdx) => (
-                <tr key={transaction.id}>
-                  <td
-                    className={clsx(
-                      transactionIdx !== transactions.length - 1
-                        ? "border-b border-gray-200 dark:border-white/10"
-                        : "",
-                      "py-4 pr-3 pl-4 text-sm font-medium whitespace-nowrap text-gray-900 sm:pl-6 lg:pl-8 dark:text-white"
-                    )}
-                  >
-                    {transaction.date.toLocaleDateString()}
-                  </td>
-                  <td
-                    className={clsx(
-                      transactionIdx !== transactions.length - 1
-                        ? "border-b border-gray-200 dark:border-white/10"
-                        : "",
-                      "hidden px-3 py-4 text-sm whitespace-nowrap text-gray-500 sm:table-cell dark:text-gray-400"
-                    )}
-                  >
-                    {transaction.amount}
-                  </td>
-                  <td
-                    className={clsx(
-                      transactionIdx !== transactions.length - 1
-                        ? "border-b border-gray-200 dark:border-white/10"
-                        : "",
-                      "hidden px-3 py-4 text-sm whitespace-nowrap text-gray-500 lg:table-cell dark:text-gray-400"
-                    )}
-                  >
-                    {transaction.description}
-                  </td>
-                  <td
-                    className={clsx(
-                      transactionIdx !== transactions.length - 1
-                        ? "border-b border-gray-200 dark:border-white/10"
-                        : "",
-                      "px-3 py-4 text-sm whitespace-nowrap text-gray-500 dark:text-gray-400"
-                    )}
-                  >
-                    {transaction.category}
-                  </td>
-                  <td
-                    className={clsx(
-                      transactionIdx !== transactions.length - 1
-                        ? "border-b border-gray-200 dark:border-white/10"
-                        : "",
-                      "py-4 pr-4 pl-3 text-right text-sm font-medium whitespace-nowrap sm:pr-8 lg:pr-8"
-                    )}
-                  >
-                    <a
-                      href="#"
-                      className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300"
-                    >
-                      Edit
-                      <span className="sr-only">, {transaction.id}</span>
-                    </a>
-                  </td>
-                </tr>
+                <Transaction
+                  transaction={transaction}
+                  key={transactionIdx}
+                  className={
+                    transactionIdx !== transactions.length - 1
+                      ? "border-b border-gray-200 dark:border-white/10"
+                      : ""
+                  }
+                />
               ))}
             </tbody>
           </table>

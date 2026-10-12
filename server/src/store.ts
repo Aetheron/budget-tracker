@@ -143,6 +143,25 @@ export class TransactionStore {
     }
   }
 
+  async delete(id: string): Promise<void> {
+    const write = this.writes.then(async () => {
+      const transactions = await this.readTransactions()
+      const index = transactions.findIndex((t) => t.id === id)
+      if (index === -1) {
+        throw new Error(`Transaction with id ${id} not found.`)
+      }
+      transactions.splice(index, 1)
+      await this.persist(transactions)
+    })
+
+    this.writes = write.then(
+      () => undefined,
+      () => undefined
+    )
+
+    return write
+  }
+
   private async readTransactions(): Promise<Transaction[]> {
     const contents = await readFile(this.filePath, "utf8")
     const transactions: unknown = JSON.parse(contents)

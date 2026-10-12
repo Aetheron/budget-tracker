@@ -96,6 +96,16 @@ export function createApp(store: TransactionStore) {
     }
   })
 
+  // Delete a transaction
+  app.delete("/api/transactions/:id", async (request, response, next) => {
+    try {
+      await store.delete(request.params.id)
+      response.status(204).end()
+    } catch (error) {
+      next(error)
+    }
+  })
+
   const handleError: ErrorRequestHandler = (
     error,
     _request,

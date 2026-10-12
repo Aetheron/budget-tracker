@@ -68,7 +68,8 @@ export default function TransactionsTable({
                     transaction.category
                       .toLowerCase()
                       .includes(search.toLowerCase()) ||
-                    transaction.amount.toString().includes(search)
+                    (search === "income" && transaction.type === "income") ||
+                    (search === "expense" && transaction.type === "expense")
                 )
                 .map((transaction, transactionIdx) => (
                   <Transaction

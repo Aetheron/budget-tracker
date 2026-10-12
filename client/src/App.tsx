@@ -169,8 +169,23 @@ function App() {
     if (!response.ok) {
       throw new Error(`Failed to delete transaction: ${response.status}`)
     }
+
     // Remove the transaction from the table
     setTransactions((prev) => prev.filter((t) => t.id !== transaction.id))
+
+    // Update the budget summary
+    setIncome(
+      (prev) => prev - (transaction.type === "income" ? transaction.amount : 0)
+    )
+    setExpense(
+      (prev) => prev - (transaction.type === "expense" ? transaction.amount : 0)
+    )
+    setBalance(
+      (prev) =>
+        prev -
+        (transaction.type === "income" ? transaction.amount : 0) +
+        (transaction.type === "expense" ? transaction.amount : 0)
+    )
   }
 
   return (

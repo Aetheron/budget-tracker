@@ -117,28 +117,30 @@ export default function Transaction({
       <td
         className={clsx(
           className,
-          "flex justify-end gap-2 py-4 pr-4 pl-3 text-right text-sm font-medium whitespace-nowrap sm:pr-8 lg:pr-8"
+          "py-4 pr-4 pl-3 text-right text-sm font-medium whitespace-nowrap sm:pr-8 lg:pr-8"
         )}
       >
-        <a
-          className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 cursor-pointer"
-          hidden={editing}
-          onClick={() => setEditing(true)}
-        >
-          Edit
-          <span className="sr-only">, {transaction.id}</span>
-        </a>
-        <a
-          className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 cursor-pointer"
-          hidden={!editing}
-          onClick={submitChanges}
-        >
-          Done
-          <span className="sr-only">, {transaction.id}</span>
-        </a>
-        <button onClick={deleteTransaction}>
-          <TrashIcon className="text-red-500 hover:text-red-400 cursor-pointer" />
-        </button>
+        <div className="flex justify-end gap-2">
+          <a
+            className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 cursor-pointer"
+            hidden={editing}
+            onClick={() => setEditing(true)}
+          >
+            Edit
+            <span className="sr-only">, {transaction.id}</span>
+          </a>
+          <a
+            className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 cursor-pointer"
+            hidden={!editing}
+            onClick={submitChanges}
+          >
+            Done
+            <span className="sr-only">, {transaction.id}</span>
+          </a>
+          <button onClick={deleteTransaction}>
+            <TrashIcon className="text-red-500 hover:text-red-400 cursor-pointer" />
+          </button>
+        </div>
       </td>
     </tr>
   )

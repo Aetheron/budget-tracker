@@ -1,4 +1,5 @@
 import clsx from "clsx"
+import { TrashIcon } from "lucide-react"
 import { useState } from "react"
 import type { TransactionType } from "../App"
 
@@ -25,6 +26,16 @@ export default function Transaction({
     }
 
     setEditing(false)
+  }
+
+  const deleteTransaction = async () => {
+    const response = await fetch(`/api/transactions/${transaction.id}`, {
+      method: "DELETE",
+    })
+    if (!response.ok) {
+      throw new Error(`Failed to delete transaction: ${response.status}`)
+    }
+    // Remove the transaction from the table
   }
 
   return (
@@ -57,7 +68,7 @@ export default function Transaction({
         </div>
         <input
           className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 dark:bg-white/5 dark:text-white dark:outline-white/10 dark:placeholder:text-gray-500 dark:focus:outline-indigo-500"
-          id="amount"
+          id={`amount-${transaction.id}`}
           name="amount"
           type="number"
           min="0.01"
@@ -77,7 +88,7 @@ export default function Transaction({
         <div hidden={editing}>{transaction.description}</div>
         <input
           className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 dark:bg-white/5 dark:text-white dark:outline-white/10 dark:placeholder:text-gray-500 dark:focus:outline-indigo-500"
-          id="description"
+          id={`description-${transaction.id}`}
           name="description"
           required
           hidden={!editing}
@@ -94,7 +105,7 @@ export default function Transaction({
         <div hidden={editing}>{transaction.category}</div>
         <input
           className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 dark:bg-white/5 dark:text-white dark:outline-white/10 dark:placeholder:text-gray-500 dark:focus:outline-indigo-500"
-          id="category"
+          id={`category-${transaction.id}`}
           name="category"
           type="text"
           required
@@ -106,7 +117,7 @@ export default function Transaction({
       <td
         className={clsx(
           className,
-          "py-4 pr-4 pl-3 text-right text-sm font-medium whitespace-nowrap sm:pr-8 lg:pr-8"
+          "flex justify-end gap-2 py-4 pr-4 pl-3 text-right text-sm font-medium whitespace-nowrap sm:pr-8 lg:pr-8"
         )}
       >
         <a
@@ -125,6 +136,9 @@ export default function Transaction({
           Done
           <span className="sr-only">, {transaction.id}</span>
         </a>
+        <button onClick={deleteTransaction}>
+          <TrashIcon className="text-red-500 hover:text-red-400 cursor-pointer" />
+        </button>
       </td>
     </tr>
   )

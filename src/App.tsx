@@ -1,3 +1,5 @@
+"use client"
+
 import { Dialog, DialogBackdrop, DialogPanel } from "@headlessui/react"
 import { XIcon } from "lucide-react"
 import { useActionState, useEffect, useState } from "react"

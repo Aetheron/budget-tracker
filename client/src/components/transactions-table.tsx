@@ -1,16 +1,14 @@
 "use client"
 
-import { useState } from "react"
-import type { TransactionType } from "../App"
-import Transaction from "./transaction"
+import { type Dispatch, type ReactNode, type SetStateAction } from "react"
 
 export default function TransactionsTable({
-  transactions,
+  search,
+  children,
 }: {
-  transactions: TransactionType[]
+  search: Dispatch<SetStateAction<string>>
+  children: ReactNode
 }) {
-  const [search, setSearch] = useState("")
-
   return (
     <div className="mt-8 flow-root">
       <div className="-mx-4 -my-2 sm:-mx-6 lg:-mx-8">
@@ -52,37 +50,13 @@ export default function TransactionsTable({
                     type="text"
                     placeholder="Search transactions"
                     className="block w-full rounded-md bg-white px-3 py-1.5 text-base font-normal text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 dark:bg-white/5 dark:text-white dark:outline-white/10 dark:placeholder:text-gray-500 dark:focus:outline-indigo-500"
-                    onChange={(e) => setSearch(e.target.value)}
+                    onChange={(e) => search(e.target.value)}
                   />
                   <span className="sr-only">Edit</span>
                 </th>
               </tr>
             </thead>
-            <tbody>
-              {transactions
-                .filter(
-                  (transaction) =>
-                    transaction.description
-                      .toLowerCase()
-                      .includes(search.toLowerCase()) ||
-                    transaction.category
-                      .toLowerCase()
-                      .includes(search.toLowerCase()) ||
-                    (search === "income" && transaction.type === "income") ||
-                    (search === "expense" && transaction.type === "expense")
-                )
-                .map((transaction, transactionIdx) => (
-                  <Transaction
-                    transaction={transaction}
-                    key={transaction.id}
-                    className={
-                      transactionIdx !== transactions.length - 1
-                        ? "border-b border-gray-200 dark:border-white/10"
-                        : ""
-                    }
-                  />
-                ))}
-            </tbody>
+            <tbody>{children}</tbody>
           </table>
         </div>
       </div>

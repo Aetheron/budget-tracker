@@ -5,6 +5,7 @@ import { XIcon } from "lucide-react"
 import { useActionState, useEffect, useState } from "react"
 import "./App.css"
 import StatsHeader from "./components/stats-header"
+import Transaction from "./components/transaction"
 import TransactionsTable from "./components/transactions-table"
 
 export type TransactionType = {
@@ -21,6 +22,7 @@ function App() {
   const [expense, setExpense] = useState(0)
   const [balance, setBalance] = useState(0)
   const [transactions, setTransactions] = useState<TransactionType[]>([])
+  const [search, setSearch] = useState("")
   const [newTransactionModalOpen, setNewTransactionModalOpen] = useState(false)
   const [formState, formAction, isSubmitting] = useActionState(
     async (_previousState: { error: string | null }, formData: FormData) => {
@@ -160,6 +162,17 @@ function App() {
     return () => controller.abort()
   }, [])
 
+  const deleteTransaction = async (transaction: TransactionType) => {
+    const response = await fetch(`/api/transactions/${transaction.id}`, {
+      method: "DELETE",
+    })
+    if (!response.ok) {
+      throw new Error(`Failed to delete transaction: ${response.status}`)
+    }
+    // Remove the transaction from the table
+    setTransactions((prev) => prev.filter((t) => t.id !== transaction.id))
+  }
+
   return (
     <>
       <section id="center" className="container mx-auto sm:px-6 lg:px-8">
@@ -181,7 +194,32 @@ function App() {
               </button>
             </div>
           </div>
-          <TransactionsTable transactions={transactions} />
+          <TransactionsTable search={setSearch}>
+            {transactions
+              .filter(
+                (transaction) =>
+                  transaction.description
+                    .toLowerCase()
+                    .includes(search.toLowerCase()) ||
+                  transaction.category
+                    .toLowerCase()
+                    .includes(search.toLowerCase()) ||
+                  (search === "income" && transaction.type === "income") ||
+                  (search === "expense" && transaction.type === "expense")
+              )
+              .map((transaction, transactionIdx) => (
+                <Transaction
+                  transaction={transaction}
+                  key={transaction.id}
+                  className={
+                    transactionIdx !== transactions.length - 1
+                      ? "border-b border-gray-200 dark:border-white/10"
+                      : ""
+                  }
+                  onDelete={() => deleteTransaction(transaction)}
+                />
+              ))}
+          </TransactionsTable>
         </div>
       </section>
 

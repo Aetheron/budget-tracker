@@ -6,9 +6,11 @@ import type { TransactionType } from "../App"
 export default function Transaction({
   transaction,
   className,
+  onDelete,
 }: {
   transaction: TransactionType
   className?: string
+  onDelete: () => void
 }) {
   const [amount, setAmount] = useState(transaction.amount)
   const [description, setDescription] = useState(transaction.description)
@@ -26,16 +28,6 @@ export default function Transaction({
     }
 
     setEditing(false)
-  }
-
-  const deleteTransaction = async () => {
-    const response = await fetch(`/api/transactions/${transaction.id}`, {
-      method: "DELETE",
-    })
-    if (!response.ok) {
-      throw new Error(`Failed to delete transaction: ${response.status}`)
-    }
-    // Remove the transaction from the table
   }
 
   return (
@@ -137,7 +129,7 @@ export default function Transaction({
             Done
             <span className="sr-only">, {transaction.id}</span>
           </a>
-          <button onClick={deleteTransaction}>
+          <button onClick={onDelete}>
             <TrashIcon className="text-red-500 hover:text-red-400 cursor-pointer" />
           </button>
         </div>

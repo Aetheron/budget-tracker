@@ -63,7 +63,7 @@ export default function Transaction({
             }`}
           >
             <span className="text-base">$</span>
-            <span>{transaction.amount}</span>
+            <span>{amount}</span>
           </div>
         </div>
         <input
@@ -85,7 +85,7 @@ export default function Transaction({
           "hidden px-3 py-4 text-sm whitespace-nowrap text-gray-500 lg:table-cell dark:text-gray-400"
         )}
       >
-        <div hidden={editing}>{transaction.description}</div>
+        <div hidden={editing}>{description}</div>
         <input
           className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 dark:bg-white/5 dark:text-white dark:outline-white/10 dark:placeholder:text-gray-500 dark:focus:outline-indigo-500"
           id={`description-${transaction.id}`}
@@ -102,7 +102,7 @@ export default function Transaction({
           "px-3 py-4 text-sm whitespace-nowrap text-gray-500 dark:text-gray-400"
         )}
       >
-        <div hidden={editing}>{transaction.category}</div>
+        <div hidden={editing}>{category}</div>
         <input
           className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 dark:bg-white/5 dark:text-white dark:outline-white/10 dark:placeholder:text-gray-500 dark:focus:outline-indigo-500"
           id={`category-${transaction.id}`}

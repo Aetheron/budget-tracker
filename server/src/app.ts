@@ -9,6 +9,12 @@ const newTransactionSchema = z.object({
   type: z.enum(["income", "expense"]),
 })
 
+const updateTransactionSchema = z.object({
+  amount: z.number().finite().positive(),
+  description: z.string().trim().min(1).max(200),
+  category: z.string().trim().min(1).max(100),
+})
+
 export function createApp(store: TransactionStore) {
   const app = express()
 
@@ -19,6 +25,7 @@ export function createApp(store: TransactionStore) {
     response.json({ status: "ok" })
   })
 
+  // Get all transactions
   app.get("/api/transactions", async (_request, response, next) => {
     try {
       response.json(await store.list())
@@ -27,6 +34,7 @@ export function createApp(store: TransactionStore) {
     }
   })
 
+  // Add a new transaction
   app.post("/api/transactions", async (request, response, next) => {
     const result = newTransactionSchema.safeParse(request.body)
     if (!result.success) {
@@ -44,6 +52,42 @@ export function createApp(store: TransactionStore) {
     }
   })
 
+  // Update an existing transaction
+  app.put("/api/transactions/:id", async (request, response, next) => {
+    const result = newTransactionSchema.safeParse(request.body)
+    if (!result.success) {
+      response.status(400).json({
+        error: "Invalid transaction.",
+        details: result.error.flatten().fieldErrors,
+      })
+      return
+    }
+
+    try {
+      response.json(await store.update(request.params.id, result.data))
+    } catch (error) {
+      next(error)
+    }
+  })
+
+  app.patch("/api/transactions/:id", async (request, response, next) => {
+    const result = updateTransactionSchema.safeParse(request.body)
+    if (!result.success) {
+      response.status(400).json({
+        error: "Invalid transaction.",
+        details: result.error.flatten().fieldErrors,
+      })
+      return
+    }
+
+    try {
+      response.json(await store.updatePartial(request.params.id, result.data))
+    } catch (error) {
+      next(error)
+    }
+  })
+
+  // Return total income, total expenses, and net balance
   app.get("/api/summary", async (_request, response, next) => {
     try {
       response.json(await store.summary())

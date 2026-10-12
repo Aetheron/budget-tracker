@@ -16,7 +16,7 @@ export default function Transaction({
 
   const submitChanges = async () => {
     const response = await fetch(`/api/transactions/${transaction.id}`, {
-      method: "PUT",
+      method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ amount, description, category }),
     })

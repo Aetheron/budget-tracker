@@ -66,6 +66,57 @@ export class TransactionStore {
     return write
   }
 
+  async update(id: string, input: NewTransaction): Promise<Transaction> {
+    const write = this.writes.then(async () => {
+      const transactions = await this.readTransactions()
+      const index = transactions.findIndex((t) => t.id === id)
+      if (index === -1) {
+        throw new Error(`Transaction with id ${id} not found.`)
+      }
+      const updatedTransaction: Transaction = {
+        ...transactions[index],
+        ...input,
+      }
+      transactions[index] = updatedTransaction
+      await this.persist(transactions)
+      return updatedTransaction
+    })
+
+    this.writes = write.then(
+      () => undefined,
+      () => undefined
+    )
+
+    return write
+  }
+
+  async updatePartial(
+    id: string,
+    input: Partial<NewTransaction>
+  ): Promise<Transaction> {
+    const write = this.writes.then(async () => {
+      const transactions = await this.readTransactions()
+      const index = transactions.findIndex((t) => t.id === id)
+      if (index === -1) {
+        throw new Error(`Transaction with id ${id} not found.`)
+      }
+      const updatedTransaction: Transaction = {
+        ...transactions[index],
+        ...input,
+      }
+      transactions[index] = updatedTransaction
+      await this.persist(transactions)
+      return updatedTransaction
+    })
+
+    this.writes = write.then(
+      () => undefined,
+      () => undefined
+    )
+
+    return write
+  }
+
   async summary(): Promise<{
     income: number
     expense: number

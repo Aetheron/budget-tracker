@@ -4,6 +4,7 @@ import { Dialog, DialogBackdrop, DialogPanel } from "@headlessui/react"
 import { XIcon } from "lucide-react"
 import { useActionState, useEffect, useState } from "react"
 import {
+  createTransaction,
   deleteTransactionAction,
   fetchSummary,
   fetchTransactions,
@@ -47,14 +48,7 @@ function App() {
       }
 
       try {
-        const response = await fetch("/api/transactions", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ amount, description, category, type }),
-        })
-        if (!response.ok) {
-          throw new Error(`Failed to save transaction: ${response.status}`)
-        }
+        await createTransaction(amount, description, category, type)
 
         try {
           const [transactionsResponse, summaryResponse] = await Promise.all([

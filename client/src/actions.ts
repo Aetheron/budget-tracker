@@ -48,6 +48,22 @@ export const fetchTransactions = async (controller: AbortController) => {
   }
 }
 
+export const createTransaction = async (
+  amount: number,
+  description: string,
+  category: string,
+  type: "income" | "expense"
+) => {
+  const response = await fetch("/api/transactions", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ amount, description, category, type }),
+  })
+  if (!response.ok) {
+    throw new Error(`Failed to save transaction: ${response.status}`)
+  }
+}
+
 export const saveTransaction = async (
   id: string,
   amount: number,

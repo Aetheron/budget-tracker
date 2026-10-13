@@ -3,6 +3,7 @@
 import { Dialog, DialogBackdrop, DialogPanel } from "@headlessui/react"
 import { XIcon } from "lucide-react"
 import { useActionState, useEffect, useState } from "react"
+import { fetchSummary } from "./actions"
 import "./App.css"
 import StatsHeader from "./components/stats-header"
 import Transaction from "./components/transaction"
@@ -100,35 +101,16 @@ function App() {
   useEffect(() => {
     const controller = new AbortController()
 
-    async function fetchSummary() {
-      try {
-        const response = await fetch("/api/summary", {
-          signal: controller.signal,
-        })
-        if (!response.ok) {
-          throw new Error(`Failed to fetch summary: ${response.status}`)
-        }
-
-        const summary: {
-          income: number
-          expense: number
-          balance: number
-        } = await response.json()
-
+    fetchSummary(controller).then((summary) => {
+      if (summary) {
         setIncome(summary.income)
         setExpense(summary.expense)
         setBalance(summary.balance)
-      } catch (error) {
-        if (!controller.signal.aborted) {
-          console.error("Unable to load budget summary", error)
-        }
       }
-    }
-
-    void fetchSummary()
+    })
 
     return () => controller.abort()
-  }, [])
+  }, [transactions])
 
   useEffect(() => {
     const controller = new AbortController()
@@ -188,6 +170,20 @@ function App() {
     )
   }
 
+  const updateSummary = () => {
+    const controller = new AbortController()
+
+    fetchSummary(controller).then((summary) => {
+      if (summary) {
+        setIncome(summary.income)
+        setExpense(summary.expense)
+        setBalance(summary.balance)
+      }
+    })
+
+    return () => controller.abort()
+  }
+
   return (
     <>
       <section id="center" className="container mx-auto sm:px-6 lg:px-8">
@@ -231,6 +227,7 @@ function App() {
                       ? "border-b border-gray-200 dark:border-white/10"
                       : ""
                   }
+                  onUpdate={() => updateSummary()}
                   onDelete={() => deleteTransaction(transaction)}
                 />
               ))}

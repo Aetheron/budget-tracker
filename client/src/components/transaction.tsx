@@ -6,10 +6,12 @@ import type { TransactionType } from "../App"
 export default function Transaction({
   transaction,
   className,
+  onUpdate,
   onDelete,
 }: {
   transaction: TransactionType
   className?: string
+  onUpdate: () => void
   onDelete: () => void
 }) {
   const [amount, setAmount] = useState(transaction.amount)
@@ -26,6 +28,8 @@ export default function Transaction({
     if (!response.ok) {
       throw new Error(`Failed to save transaction: ${response.status}`)
     }
+
+    onUpdate()
 
     setEditing(false)
   }

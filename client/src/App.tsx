@@ -3,7 +3,7 @@
 import { Dialog, DialogBackdrop, DialogPanel } from "@headlessui/react"
 import { XIcon } from "lucide-react"
 import { useActionState, useEffect, useState } from "react"
-import { fetchSummary } from "./actions"
+import { fetchSummary, fetchTransactions } from "./actions"
 import "./App.css"
 import StatsHeader from "./components/stats-header"
 import Transaction from "./components/transaction"
@@ -115,31 +115,11 @@ function App() {
   useEffect(() => {
     const controller = new AbortController()
 
-    async function fetchTransactions() {
-      try {
-        const response = await fetch("/api/transactions", {
-          signal: controller.signal,
-        })
-        if (!response.ok) {
-          throw new Error(`Failed to fetch transactions: ${response.status}`)
-        }
-
-        const result: Array<Omit<TransactionType, "date"> & { date: string }> =
-          await response.json()
-        setTransactions(
-          result.map((transaction) => ({
-            ...transaction,
-            date: new Date(transaction.date),
-          }))
-        )
-      } catch (error) {
-        if (!controller.signal.aborted) {
-          console.error("Unable to load transactions", error)
-        }
+    fetchTransactions(controller).then((transactions) => {
+      if (transactions) {
+        setTransactions(transactions)
       }
-    }
-
-    void fetchTransactions()
+    })
 
     return () => controller.abort()
   }, [])

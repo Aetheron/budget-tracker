@@ -2,6 +2,7 @@ import clsx from "clsx"
 import { TrashIcon } from "lucide-react"
 import { useState } from "react"
 import type { TransactionType } from "../App"
+import { saveTransaction } from "../actions"
 
 export default function Transaction({
   transaction,
@@ -20,14 +21,7 @@ export default function Transaction({
   const [editing, setEditing] = useState(false)
 
   const submitChanges = async () => {
-    const response = await fetch(`/api/transactions/${transaction.id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ amount, description, category }),
-    })
-    if (!response.ok) {
-      throw new Error(`Failed to save transaction: ${response.status}`)
-    }
+    await saveTransaction(transaction.id, amount, description, category)
 
     onUpdate()
 

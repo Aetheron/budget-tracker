@@ -1,3 +1,5 @@
+"use server"
+
 import type { TransactionType } from "./App"
 
 export const fetchSummary = async (controller: AbortController) => {
@@ -43,5 +45,21 @@ export const fetchTransactions = async (controller: AbortController) => {
     if (!controller.signal.aborted) {
       console.error("Unable to load transactions", error)
     }
+  }
+}
+
+export const saveTransaction = async (
+  id: string,
+  amount: number,
+  description: string,
+  category: string
+) => {
+  const response = await fetch(`/api/transactions/${id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ amount, description, category }),
+  })
+  if (!response.ok) {
+    throw new Error(`Failed to save transaction: ${response.status}`)
   }
 }

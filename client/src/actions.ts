@@ -63,3 +63,12 @@ export const saveTransaction = async (
     throw new Error(`Failed to save transaction: ${response.status}`)
   }
 }
+
+export const deleteTransactionAction = async (id: string) => {
+  const response = await fetch(`/api/transactions/${id}`, {
+    method: "DELETE",
+  })
+  if (!response.ok) {
+    throw new Error(`Failed to delete transaction: ${response.status}`)
+  }
+}

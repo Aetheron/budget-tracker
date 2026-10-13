@@ -3,7 +3,11 @@
 import { Dialog, DialogBackdrop, DialogPanel } from "@headlessui/react"
 import { XIcon } from "lucide-react"
 import { useActionState, useEffect, useState } from "react"
-import { fetchSummary, fetchTransactions } from "./actions"
+import {
+  deleteTransactionAction,
+  fetchSummary,
+  fetchTransactions,
+} from "./actions"
 import "./App.css"
 import StatsHeader from "./components/stats-header"
 import Transaction from "./components/transaction"
@@ -125,12 +129,7 @@ function App() {
   }, [])
 
   const deleteTransaction = async (transaction: TransactionType) => {
-    const response = await fetch(`/api/transactions/${transaction.id}`, {
-      method: "DELETE",
-    })
-    if (!response.ok) {
-      throw new Error(`Failed to delete transaction: ${response.status}`)
-    }
+    await deleteTransactionAction(transaction.id)
 
     // Remove the transaction from the table
     setTransactions((prev) => prev.filter((t) => t.id !== transaction.id))
